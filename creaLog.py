@@ -12,6 +12,7 @@ FUNCTIONS:
     FALTEN FUNCIONS PER POSCAR ACI
 """
 import os
+import libcte as cte
 
 """
 CONSTANTS:
@@ -148,8 +149,6 @@ def comprobarArchivos() :
             raise IOError("ERROR: No se encuentra el bgzip del manifest, necesario para Strelka2. Ejecuta manifest.sh para crearlo")
         if not os.path.isfile(manifestidx) :
             raise IOError("ERROR: No se encuentra el indice del manifest, necesario para Strelka2. Ejecuta manifest.sh para crearlo")
-    if not os.path.isfile(indels) :
-        raise IOError("No se encuentra el archivo para poder realizar el realineamiento de indels")
     if not os.path.isfile(dbsnp) :
         raise IOError("No se encuentra el archivo de SNPs")
     if not os.path.isfile(genes) :
@@ -219,12 +218,12 @@ def prepararScript(ruta) :
         fi.write("\n\t# Control de calidad. FastQC\n")
         fi.write("\tmkdir fastqc # Carpeta donde se guardara el control de calidad\n")
         # La cadena fastqc tiene una variable (fastq) que se usa para introducir el archivo FASTQ para el analisis
-        fi.write("\t" + fastqc.format(fastq = "../$forward") + "\n")
-        fi.write("\t" + fastqc.format(fastq = "../$reverse") + "\n")
+        fi.write("\t" + cte.getFastQC("../$forward") + "\n")
+        fi.write("\t" + cte.getFastQC("../$reverse") + "\n")
         fi.write("\trm fastqc/*zip # Eliminar los archivos comprimidos, ya se han descomprimido al finalizar FastQC\n")
         fi.write("\n\t# Alineamiento. BWA\n")
         # La cadena align tiene cuatro variables: rg es para introducir el read group, fw es para el fastq forward, rv es para el fastq reverse y ref es para el genoma de referencia
-        fi.write("\t" + bwa.format(rg = "$readgroup", ref = "$ref", fw = "../$forward", rv = "../$reverse") + "\n")
+        fi.write("\t" + cte.getAln("$readgroup", "$ref", "../$forward", "../$reverse") + "\n")
         fi.write("\t" + picardSort + "\n")
         fi.write("\t" + picardIndex.format(bam = "bwa.sort.bam") + "\n")
         fi.write("\tmkdir bwaAlign\n")
